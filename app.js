@@ -92,21 +92,6 @@ function renderBoard() {
     countEl.textContent = filtered.length;
     col.innerHTML = '';
     filtered.forEach(t => col.appendChild(makeCard(t)));
-
-    col.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      col.classList.add('drag-over');
-    });
-    col.addEventListener('dragleave', e => {
-      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
-    });
-    col.addEventListener('drop', e => {
-      e.preventDefault();
-      col.classList.remove('drag-over');
-      const row = parseInt(e.dataTransfer.getData('text/plain'), 10);
-      if (!isNaN(row)) moveTask(row, status);
-    });
   });
   renderStats();
 }
@@ -336,7 +321,7 @@ function badgePri(p) {
 function ownerCell(owner) {
   if (!owner) return '–';
   return `<div class="card-owner">
-    <div class="avatar">${owner.charAt(0).toUpperCase()}</div>
+    <div class="avatar">${esc(owner).charAt(0).toUpperCase()}</div>
     <span>${esc(owner)}</span>
   </div>`;
 }
@@ -379,6 +364,24 @@ async function loadAndRender() {
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadAndRender();
+
+  COL_IDS.forEach((id, i) => {
+    const col = document.getElementById(id);
+    col.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', e => {
+      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const row = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (!isNaN(row)) moveTask(row, STATUSES[i]);
+    });
+  });
 
   document.getElementById('btn-add').onclick    = () => openModal(null);
   document.getElementById('modal-close').onclick = closeModal;
