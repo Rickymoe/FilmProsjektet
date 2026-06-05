@@ -55,6 +55,34 @@ async function writeTask(action, params) {
 }
 
 // ── Render: Kanban ──────────────────────────────────────────────────────────
+async function moveTask(row, newStatus) {
+  const task = tasks.find(t => t._row === row);
+  if (!task || task['Status'] === newStatus) return;
+
+  const oldStatus = task['Status'];
+  task['Status'] = newStatus;
+  renderBoard();
+
+  const ok = await writeTask('update', {
+    row,
+    oppgave:   task['Oppgave'],
+    prioritet: task['Prioritet'] || '',
+    eier:      task['Eier'] || '',
+    status:    newStatus,
+    startdato: task['Startdato'] || '',
+    sluttdato: task['Sluttdato'] || '',
+    merknader: task['Merknader'] || '',
+  });
+
+  if (!ok) {
+    task['Status'] = oldStatus;
+    renderBoard();
+    showToast('Feil ved lagring av statusendring', 'error');
+  } else {
+    showToast('Status oppdatert ✓', 'success');
+  }
+}
+
 function renderBoard() {
   STATUSES.forEach((status, i) => {
     const col      = document.getElementById(COL_IDS[i]);
@@ -64,6 +92,21 @@ function renderBoard() {
     countEl.textContent = filtered.length;
     col.innerHTML = '';
     filtered.forEach(t => col.appendChild(makeCard(t)));
+
+    col.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', e => {
+      if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over');
+    });
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const row = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (!isNaN(row)) moveTask(row, status);
+    });
   });
   renderStats();
 }
@@ -76,8 +119,17 @@ function makeCard(task) {
   const notes    = task['Merknader'] || '';
   const overdue  = isOverdue(deadline);
 
-  card.className = `card${overdue ? ' overdue' : ''}`;
-  card.onclick   = () => openModal(task);
+  card.className   = `card${overdue ? ' overdue' : ''}`;
+  card.draggable   = true;
+  card.onclick     = () => openModal(task);
+  card.addEventListener('dragstart', e => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(task._row));
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+  });
 
   card.innerHTML = `
     <div class="card-top">
