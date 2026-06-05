@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProsjektA – Oppgaveoversikt</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">🎬</span>
+        <div>
+          <h1 class="project-name">ProsjektA</h1>
+          <p class="project-sub">Prosjektoppgaver</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-num" id="stat-total">–</span>
+          <span class="stat-label">Totalt</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="stat-done">–</span>
+          <span class="stat-label">Fullført</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="stat-blocked">–</span>
+          <span class="stat-label">Blokkert</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="kanban" title="Kanban-tavle">⊞</button>
+        <button class="view-btn" data-view="table" title="Tabellvisning">☰</button>
+      </div>
+      <button class="btn-primary" id="btn-add">+ Ny oppgave</button>
+    </div>
+  </header>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Laster oppgaver…</p>
+  </div>
+
+  <!-- Kanban Board -->
+  <main class="board hidden" id="board">
+    <div class="column" data-status="Ikke startet">
+      <div class="column-header">
+        <div class="column-dot dot-blue"></div>
+        <span class="column-title">Ikke startet</span>
+        <span class="column-count" id="count-0">0</span>
+      </div>
+      <div class="column-body" id="col-0"></div>
+      <button class="btn-add-card" onclick="openModal(null,'Ikke startet')">+ Legg til oppgave</button>
+    </div>
+    <div class="column" data-status="Pågår">
+      <div class="column-header">
+        <div class="column-dot dot-yellow"></div>
+        <span class="column-title">Pågår</span>
+        <span class="column-count" id="count-1">0</span>
+      </div>
+      <div class="column-body" id="col-1"></div>
+      <button class="btn-add-card" onclick="openModal(null,'Pågår')">+ Legg til oppgave</button>
+    </div>
+    <div class="column" data-status="Blokkert">
+      <div class="column-header">
+        <div class="column-dot dot-red"></div>
+        <span class="column-title">Blokkert</span>
+        <span class="column-count" id="count-2">0</span>
+      </div>
+      <div class="column-body" id="col-2"></div>
+      <button class="btn-add-card" onclick="openModal(null,'Blokkert')">+ Legg til oppgave</button>
+    </div>
+    <div class="column" data-status="Fullført">
+      <div class="column-header">
+        <div class="column-dot dot-green"></div>
+        <span class="column-title">Fullført</span>
+        <span class="column-count" id="count-3">0</span>
+      </div>
+      <div class="column-body" id="col-3"></div>
+      <button class="btn-add-card" onclick="openModal(null,'Fullført')">+ Legg til oppgave</button>
+    </div>
+  </main>
+
+  <!-- Table View -->
+  <div class="table-view hidden" id="table-view">
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th>Oppgave</th>
+          <th>Prioritet</th>
+          <th>Eier</th>
+          <th>Status</th>
+          <th>Startdato</th>
+          <th>Sluttdato</th>
+          <th>Merknader</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Ny oppgave</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="field-row">
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Oppgave *</label>
+          <input type="text" id="field-oppgave" placeholder="Beskriv oppgaven…">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prioritet</label>
+          <select id="field-prioritet">
+            <option value="">Velg prioritet</option>
+            <option value="P0">P0 – Kritisk</option>
+            <option value="P1">P1 – Høy</option>
+            <option value="P2">P2 – Medium</option>
+            <option value="P3">P3 – Lav</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Eier</label>
+          <input type="text" id="field-eier" list="owners-list" placeholder="Navn…">
+          <datalist id="owners-list"></datalist>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="field-status">
+            <option value="Ikke startet">Ikke startet</option>
+            <option value="Pågår">Pågår</option>
+            <option value="Blokkert">Blokkert</option>
+            <option value="Fullført">Fullført</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Startdato</label>
+          <input type="date" id="field-startdato">
+        </div>
+        <div class="form-group">
+          <label>Sluttdato</label>
+          <input type="date" id="field-sluttdato">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Merknader</label>
+          <textarea id="field-merknader" placeholder="Notater og kommentarer…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="btn-delete" style="display:none">🗑 Slett</button>
+      <div class="footer-right">
+        <button class="btn-ghost" id="btn-cancel">Avbryt</button>
+        <button class="btn-primary" id="btn-save">Lagre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
