@@ -128,9 +128,9 @@ function makeCard(task) {
           <div class="avatar">${owner.charAt(0).toUpperCase()}</div>
           <span>${esc(owner)}</span>
         </div>` : ''}
-      ${startdato ? `<span class="card-date">Start: ${esc(startdato)}</span>` : ''}
-      ${deadline  ? `<span class="card-date">Frist: ${esc(deadline)}</span>` : ''}
-      ${overdue   ? `<span class="overdue-tag">Forfalt</span>` : ''}
+      <span class="card-date">Start: ${startdato ? esc(startdato) : '–'}</span>
+      <span class="card-date">Frist: ${deadline  ? esc(deadline)  : '–'}</span>
+      ${overdue ? `<span class="overdue-tag">Forfalt</span>` : ''}
     </div>
     ${notes ? `<div class="card-notes">${esc(notes)}</div>` : ''}
   `;
