@@ -192,7 +192,8 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--rs);
   padding: 11px 12px;
-  cursor: pointer; transition: all .15s;
+  cursor: grab; transition: all .15s;
+  user-select: none;
 }
 .card:hover {
   background: var(--card-h);
@@ -242,6 +243,13 @@ body {
 
 /* overdue highlight */
 .card.overdue { border-color: rgba(255,82,82,.35); }
+.card.dragging        { opacity: .4; cursor: grabbing; }
+.column-body.drag-over {
+  background: rgba(74,158,255,.07);
+  outline: 2px dashed var(--blue);
+  outline-offset: -4px;
+  border-radius: var(--rs);
+}
 .overdue-tag {
   font-size: 10px; color: var(--red);
   background: var(--red-bg); padding: 1px 6px;
