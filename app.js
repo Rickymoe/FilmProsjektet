@@ -1,8 +1,5 @@
 // ── Config ─────────────────────────────────────────────────────────────────
-// Restrict this API key in Google Cloud Console to:
-//   • Sheets API only
-//   • HTTP referrers: your GitHub Pages domain
-const API_KEY        = 'AIzaSyAZczEsV1gbPOhZU1N4-Qu4rlQP72Sdnog';
+const API_KEY        = '%%GOOGLE_API_KEY%%';
 const SPREADSHEET_ID = '1GCW6VUrmC-A5EjqgIOtilqbZU4422KnEePjhjKXwkdU';
 const SHEET_NAME     = 'Prosjektoppgaver';
 const TEAM_SHEET_NAME = 'Team';
