@@ -109,6 +109,77 @@ async function loadAndRenderTeam() {
   }
 }
 
+function openMemberModal(member) {
+  document.getElementById('member-field-row').value   = member ? member._row : '';
+  document.getElementById('member-field-navn').value  = member ? (member['Navn']   || '') : '';
+  document.getElementById('member-field-rolle').value = member ? (member['Rolle']  || '') : '';
+  document.getElementById('member-field-epost').value = member ? (member['E-post'] || '') : '';
+  document.getElementById('member-field-mobil').value = member ? (member['Mobil']  || '') : '';
+
+  document.getElementById('member-modal-title').textContent      = member ? 'Rediger person' : 'Nytt teammedlem';
+  document.getElementById('member-btn-delete').style.display     = member ? 'inline-flex' : 'none';
+  document.getElementById('member-modal-overlay').classList.remove('hidden');
+  document.getElementById('member-field-navn').focus();
+}
+
+function closeMemberModal() {
+  document.getElementById('member-modal-overlay').classList.add('hidden');
+}
+
+async function saveMember() {
+  const rowField = document.getElementById('member-field-row').value;
+  const navn     = document.getElementById('member-field-navn').value.trim();
+
+  if (!navn) {
+    document.getElementById('member-field-navn').focus();
+    showToast('Navn er påkrevd', 'error');
+    return;
+  }
+
+  const params = {
+    navn,
+    rolle: document.getElementById('member-field-rolle').value.trim(),
+    epost: document.getElementById('member-field-epost').value.trim(),
+    mobil: document.getElementById('member-field-mobil').value.trim(),
+  };
+
+  const btn = document.getElementById('member-btn-save');
+  btn.textContent = 'Lagrer…';
+  btn.disabled    = true;
+
+  const action = rowField ? 'updatemember' : 'addmember';
+  if (rowField) params.row = rowField;
+
+  const ok = await writeTask(action, params);
+
+  btn.textContent = 'Lagre';
+  btn.disabled    = false;
+
+  showToast(ok
+    ? (rowField ? 'Person oppdatert ✓' : 'Person lagt til ✓')
+    : 'Feil ved lagring – sjekk Apps Script URL',
+    ok ? 'success' : 'error');
+
+  if (ok) {
+    closeMemberModal();
+    await loadAndRenderTeam();
+  }
+}
+
+async function deleteMemberFromSheet() {
+  const rowField = document.getElementById('member-field-row').value;
+  if (!rowField) return;
+  if (!confirm('Er du sikker på at du vil slette dette teammedlemmet?')) return;
+
+  const ok = await writeTask('deletemember', { row: rowField });
+  showToast(ok ? 'Person slettet' : 'Feil ved sletting', ok ? 'success' : 'error');
+
+  if (ok) {
+    closeMemberModal();
+    await loadAndRenderTeam();
+  }
+}
+
 // ── Write (via Apps Script) ─────────────────────────────────────────────────
 async function writeTask(action, params) {
   if (!APPS_SCRIPT_URL) {
