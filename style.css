@@ -371,6 +371,40 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
+/* ── Tab Navigation ─────────────────────────── */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  padding: 0 22px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  background: none; border: none;
+  color: var(--txt2); font-size: 13px; font-weight: 500;
+  padding: 10px 16px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s; font-family: inherit;
+}
+.tab-btn:hover { color: var(--txt); }
+.tab-btn.active {
+  color: var(--txt);
+  border-bottom-color: var(--blue);
+  font-weight: 600;
+}
+
+/* ── Team View ───────────────────────────────── */
+.team-view { flex: 1; overflow: auto; padding: 20px 22px; }
+
+.team-toolbar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.team-count { font-size: 12px; color: var(--txt2); }
+
 /* ── Responsive (narrow screens) ────────────── */
 @media (max-width: 900px) {
   .board { grid-template-columns: repeat(2, 1fr); }
