@@ -5,6 +5,7 @@
 const API_KEY        = 'AIzaSyAZczEsV1gbPOhZU1N4-Qu4rlQP72Sdnog';
 const SPREADSHEET_ID = '1GCW6VUrmC-A5EjqgIOtilqbZU4422KnEePjhjKXwkdU';
 const SHEET_NAME     = 'Prosjektoppgaver';
+const TEAM_SHEET_NAME = 'Team';
 
 // Paste your deployed Apps Script Web App URL here after setup
 let APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbzYoY7vwqixC5QhvElpdhh33us5c4Ni9TEvK3ZnosFSx3dJo3jPLRQHFZyEwNx7jTSg/exec';
@@ -14,6 +15,7 @@ const STATUSES   = ['Ikke startet', 'Pågår', 'Blokkert', 'Fullført'];
 const COL_IDS    = ['col-0', 'col-1', 'col-2', 'col-3'];
 
 let tasks       = [];
+let members     = [];
 let currentView = 'kanban';
 
 // ── Fetch (read via Sheets API) ─────────────────────────────────────────────
@@ -37,6 +39,74 @@ async function fetchTasks() {
       return t;
     })
     .filter(t => t['Oppgave'] && t['Oppgave'].trim() !== '' && t['Oppgave'] !== 'Oppgave');
+}
+
+async function fetchMembers() {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}`
+            + `/values/${encodeURIComponent(TEAM_SHEET_NAME)}`
+            + `?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
+
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`Sheets API feil (team): ${res.status}`);
+  const data = await res.json();
+
+  const rows = data.values || [];
+  if (rows.length < 2) return [];
+
+  const headers = rows[0];
+  return rows.slice(1)
+    .map((row, i) => {
+      const m = { _row: i + 2 };
+      headers.forEach((h, j) => { m[h] = (row[j] ?? ''); });
+      return m;
+    })
+    .filter(m => m['Navn'] && m['Navn'].trim() !== '' && m['Navn'] !== 'Navn');
+}
+
+function renderTeamTable() {
+  const tbody   = document.getElementById('team-body');
+  const countEl = document.getElementById('team-count');
+
+  countEl.textContent = `${members.length} teammedlem${members.length === 1 ? '' : 'mer'}`;
+  tbody.innerHTML = '';
+
+  members.forEach(m => {
+    const tr   = document.createElement('tr');
+    tr.onclick = () => openMemberModal(m);
+
+    const initial = (m['Navn'] || '?').charAt(0).toUpperCase();
+    tr.innerHTML = `
+      <td>
+        <div class="card-owner">
+          <div class="avatar">${esc(initial)}</div>
+          <span>${esc(m['Navn'] || '')}</span>
+        </div>
+      </td>
+      <td style="color:var(--blue)">${esc(m['Rolle'] || '–')}</td>
+      <td style="color:var(--txt2)">${esc(m['E-post'] || '–')}</td>
+      <td style="color:var(--txt2)">${esc(m['Mobil'] || '–')}</td>
+      <td>
+        <button class="btn-ghost" style="padding:4px 10px;font-size:11px"
+          onclick="event.stopPropagation();openMemberModal(members.find(x=>x._row===${m._row}))">
+          Rediger
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function loadAndRenderTeam() {
+  try {
+    members = await fetchMembers();
+    renderTeamTable();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('team-body').innerHTML =
+      `<tr><td colspan="5" style="color:var(--red);padding:20px">
+        Feil ved lasting av team: ${esc(err.message)}
+      </td></tr>`;
+  }
 }
 
 // ── Write (via Apps Script) ─────────────────────────────────────────────────
