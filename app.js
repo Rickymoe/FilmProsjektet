@@ -418,6 +418,32 @@ function setView(view) {
   if (view === 'table') renderTable();
 }
 
+function setMainTab(tab) {
+  const isTeam = tab === 'team';
+
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab));
+
+  document.querySelector('.stats').classList.toggle('hidden', isTeam);
+  document.querySelector('.view-toggle').classList.toggle('hidden', isTeam);
+  document.getElementById('btn-add').classList.toggle('hidden', isTeam);
+  document.getElementById('loading').classList.toggle('hidden', true);
+
+  if (isTeam) {
+    document.getElementById('board').classList.add('hidden');
+    document.getElementById('table-view').classList.add('hidden');
+    document.getElementById('team-view').classList.remove('hidden');
+    loadAndRenderTeam();
+  } else {
+    document.getElementById('team-view').classList.add('hidden');
+    if (currentView === 'kanban') {
+      document.getElementById('board').classList.remove('hidden');
+    } else {
+      document.getElementById('table-view').classList.remove('hidden');
+    }
+  }
+}
+
 // ── Toast ───────────────────────────────────────────────────────────────────
 let _toastTimer;
 function showToast(msg, type = '') {
@@ -539,8 +565,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.view-btn').forEach(btn =>
     btn.addEventListener('click', () => setView(btn.dataset.view)));
 
+  // Tab navigation
+  document.querySelectorAll('.tab-btn').forEach(btn =>
+    btn.addEventListener('click', () => setMainTab(btn.dataset.tab)));
+
+  // Member modal
+  document.getElementById('btn-add-member').onclick    = () => openMemberModal(null);
+  document.getElementById('member-modal-close').onclick = closeMemberModal;
+  document.getElementById('member-btn-cancel').onclick  = closeMemberModal;
+  document.getElementById('member-btn-save').onclick    = saveMember;
+  document.getElementById('member-btn-delete').onclick  = deleteMemberFromSheet;
+
+  document.getElementById('member-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('member-modal-overlay')) closeMemberModal();
+  });
+
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') saveTask();
+    if (e.key === 'Escape') {
+      closeModal();
+      closeMemberModal();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      if (!document.getElementById('member-modal-overlay').classList.contains('hidden')) {
+        saveMember();
+      } else {
+        saveTask();
+      }
+    }
   });
 });
