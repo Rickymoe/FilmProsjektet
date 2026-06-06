@@ -1,18 +1,5 @@
-// ═══════════════════════════════════════════════════════════════════
-//  ProsjektA – Apps Script Web App
-//
-//  OPPSETT:
-//  1. Åpne spreadsheet → Utvidelser → Apps Script
-//  2. Lim inn hele denne filen som Code.gs
-//  3. Klikk "Distribuer" → "Ny distribusjon"
-//     - Type: Nettapp
-//     - Kjøres som: Meg
-//     - Hvem har tilgang: Alle
-//  4. Klikk "Distribuer" og godkjenn tillatelser
-//  5. Kopier URL-en og lim inn i app.js som APPS_SCRIPT_URL
-// ═══════════════════════════════════════════════════════════════════
-
-const SHEET_NAME = 'Prosjektoppgaver';
+const SHEET_NAME      = 'Prosjektoppgaver';
+const TEAM_SHEET_NAME = 'Team';
 
 function doGet(e) {
   const lock = LockService.getScriptLock();
@@ -20,14 +7,17 @@ function doGet(e) {
 
   try {
     const ss     = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet  = ss.getSheetByName(SHEET_NAME);
     const action = (e.parameter.action || 'get').toLowerCase();
 
     let result;
-    if      (action === 'get')    result = getData(sheet);
-    else if (action === 'add')    result = addRow(sheet, e.parameter);
-    else if (action === 'update') result = updateRow(sheet, e.parameter);
-    else if (action === 'delete') result = deleteRow(sheet, e.parameter);
+    if      (action === 'get')          result = getData(ss.getSheetByName(SHEET_NAME));
+    else if (action === 'add')          result = addRow(ss.getSheetByName(SHEET_NAME), e.parameter);
+    else if (action === 'update')       result = updateRow(ss.getSheetByName(SHEET_NAME), e.parameter);
+    else if (action === 'delete')       result = deleteRow(ss.getSheetByName(SHEET_NAME), e.parameter);
+    else if (action === 'getmembers')   result = getData(ss.getSheetByName(TEAM_SHEET_NAME));
+    else if (action === 'addmember')    result = addMember(ss.getSheetByName(TEAM_SHEET_NAME), e.parameter);
+    else if (action === 'updatemember') result = updateMember(ss.getSheetByName(TEAM_SHEET_NAME), e.parameter);
+    else if (action === 'deletemember') result = deleteMember(ss.getSheetByName(TEAM_SHEET_NAME), e.parameter);
     else result = { success: false, error: 'Ukjent action: ' + action };
 
     return output(result);
@@ -38,7 +28,7 @@ function doGet(e) {
   }
 }
 
-// ── Read ─────────────────────────────────────────────────────────────────────
+// ── Tasks ────────────────────────────────────────────────────────────────────
 function getData(sheet) {
   const data = sheet.getDataRange().getValues();
   if (data.length < 2) return { success: true, data: [] };
@@ -64,7 +54,6 @@ function getData(sheet) {
   return { success: true, data: rows };
 }
 
-// ── Add ──────────────────────────────────────────────────────────────────────
 function addRow(sheet, p) {
   sheet.appendRow([
     p.oppgave   || '',
@@ -78,7 +67,6 @@ function addRow(sheet, p) {
   return { success: true };
 }
 
-// ── Update ───────────────────────────────────────────────────────────────────
 function updateRow(sheet, p) {
   const row = parseInt(p.row);
   if (!row || isNaN(row)) return { success: false, error: 'Ugyldig radnummer' };
@@ -95,11 +83,40 @@ function updateRow(sheet, p) {
   return { success: true };
 }
 
-// ── Delete ───────────────────────────────────────────────────────────────────
 function deleteRow(sheet, p) {
   const row = parseInt(p.row);
   if (!row || isNaN(row)) return { success: false, error: 'Ugyldig radnummer' };
+  sheet.deleteRow(row);
+  return { success: true };
+}
 
+// ── Team members ─────────────────────────────────────────────────────────────
+function addMember(sheet, p) {
+  sheet.appendRow([
+    p.navn  || '',
+    p.rolle || '',
+    p.epost || '',
+    p.mobil || '',
+  ]);
+  return { success: true };
+}
+
+function updateMember(sheet, p) {
+  const row = parseInt(p.row);
+  if (!row || isNaN(row)) return { success: false, error: 'Ugyldig radnummer' };
+
+  sheet.getRange(row, 1, 1, 4).setValues([[
+    p.navn  || '',
+    p.rolle || '',
+    p.epost || '',
+    p.mobil || '',
+  ]]);
+  return { success: true };
+}
+
+function deleteMember(sheet, p) {
+  const row = parseInt(p.row);
+  if (!row || isNaN(row)) return { success: false, error: 'Ugyldig radnummer' };
   sheet.deleteRow(row);
   return { success: true };
 }
