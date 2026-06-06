@@ -47,6 +47,12 @@
     </div>
   </header>
 
+  <!-- Tab navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="tasks">📋 Oppgaver</button>
+    <button class="tab-btn" data-tab="team">👥 Team</button>
+  </nav>
+
   <!-- Loading -->
   <div class="loading" id="loading">
     <div class="spinner"></div>
@@ -109,6 +115,26 @@
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Team View -->
+  <div class="team-view hidden" id="team-view">
+    <div class="team-toolbar">
+      <span class="team-count" id="team-count">0 teammedlemmer</span>
+      <button class="btn-primary" id="btn-add-member">+ Legg til person</button>
+    </div>
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th>Navn</th>
+          <th>Rolle</th>
+          <th>E-post</th>
+          <th>Mobil</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="team-body"></tbody>
     </table>
   </div>
 
@@ -181,6 +207,48 @@
     </div>
   </div>
 </div>
+
+  <!-- Member Modal -->
+  <div class="modal-overlay hidden" id="member-modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="member-modal-title">Nytt teammedlem</h2>
+        <button class="modal-close" id="member-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="member-field-row">
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Navn *</label>
+            <input type="text" id="member-field-navn" placeholder="Fullt navn…">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rolle</label>
+            <input type="text" id="member-field-rolle" placeholder="F.eks. Regissør…">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>E-post</label>
+            <input type="email" id="member-field-epost" placeholder="navn@eksempel.no">
+          </div>
+          <div class="form-group">
+            <label>Mobil</label>
+            <input type="tel" id="member-field-mobil" placeholder="+47 000 00 000">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="member-btn-delete" style="display:none">🗑 Slett</button>
+        <div class="footer-right">
+          <button class="btn-ghost" id="member-btn-cancel">Avbryt</button>
+          <button class="btn-primary" id="member-btn-save">Lagre</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
